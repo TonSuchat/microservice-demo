@@ -1,7 +1,9 @@
 import React from "react";
 import { useQuery } from "@apollo/react-hooks";
+import AddListing from "./AddListing";
 import gql from "graphql-tag";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 
 const Description = styled.p`
   margin-botton: 0;
@@ -31,20 +33,29 @@ const query = gql`
 `;
 
 function Listings() {
-  const { data, loading } = useQuery(query);
+  const session = useSelector((state) => state.session);
+  const { data, loading, refetch } = useQuery(query);
   if (loading) return "Loading Listings...";
 
-  if (!data.listings || data.listings.length == 0)
+  if (!data.listings || data.listings.length == 0) {
     return "Not found any listings";
+  }
+
+  const handleOnAddedListing = () => {
+    refetch();
+  };
 
   return (
     <div>
-      {data.listings.map((listing) => (
-        <Listing key={listing.id}>
-          <Title>{listing.title}</Title>
-          <Description>{listing.description}</Description>
-        </Listing>
-      ))}
+      <div>
+        {data.listings.map((listing) => (
+          <Listing key={listing.id}>
+            <Title>{listing.title}</Title>
+            <Description>{listing.description}</Description>
+          </Listing>
+        ))}
+      </div>
+      {session && <AddListing onAddedListing={handleOnAddedListing} />}
     </div>
   );
 }
